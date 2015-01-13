@@ -1,4 +1,4 @@
 mTruncate
 =========
 
-The official mTruncate respository
+The official mTruncate repository
