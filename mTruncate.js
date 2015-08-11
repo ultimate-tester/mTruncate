@@ -12,6 +12,11 @@
             var wrapper = truncateElement.wrap('<div class="mTruncate-wrapper mTruncate-collapsed" />').parent();
             var control = $('<div class="mTruncate-control">' + settings.expandText + '</div>').appendTo(wrapper);
 
+            var floatStyle = truncateElement.css('float');
+            if(floatStyle == 'left' || floatStyle == 'right') {
+                wrapper.css('float', floatStyle);
+            }
+
             var collapsedHeight = 0;
             var foundLines = 0;
 
@@ -93,11 +98,13 @@
             }).trigger('resize');
 
             control.click(function () {
+                var mTruncateHidden = $('.mTruncate-hidden');
+
                 if (wrapper.hasClass('mTruncate-collapsed')) {
-                    $('.mTruncate-hidden').show();
+                    mTruncateHidden.show();
                     var fullHeight = truncateElement.css('height', '100%').outerHeight();
 
-                    $('.mTruncate-hidden').hide();
+                    mTruncateHidden.hide();
                     truncateElement.css('height', collapsedHeight);
 
                     truncateElement.animate({height: fullHeight}, 'slow', function () {
@@ -105,12 +112,12 @@
                     });
                     control.html(settings.collapseText);
 
-                    $('.mTruncate-hidden').fadeIn('slow');
+                    mTruncateHidden.fadeIn('slow');
 
                     wrapper.removeClass('mTruncate-collapsed');
                 } else {
                     if (settings.hideImageOnCollapse == true) {
-                        $('.mTruncate-hidden').fadeOut('slow');
+                        mTruncateHidden.fadeOut('slow');
                     }
 
                     truncateElement.animate({height: collapsedHeight}, 'slow');
