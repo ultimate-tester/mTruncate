@@ -54,14 +54,13 @@
                         return true;
                     }
 
-                    if (tagName.startsWith('H') && tagName.length == 2 && !isNaN(tagName[1])) {
+                    if (tagName.indexOf('H') == 0 && tagName.length == 2 && !isNaN(tagName[1])) {
                         collapsedHeight += $(this).height();
                         collapsedHeight += parseFloat($(this).css('margin-top'));
                         collapsedHeight += parseFloat($(this).css('margin-bottom'));
 
                         foundLines++;
-                    }
-                    else if (tagName.toLowerCase() == 'img') {
+                    } else if (tagName.toLowerCase() == 'img') {
                         if (settings.hideImageOnCollapse) {
                             if ($(this).hasClass('mTruncate-hidden') == false) {
                                 $(this).addClass('mTruncate-hidden');
@@ -75,8 +74,7 @@
                         collapsedHeight += parseFloat($(this).css('margin-bottom'));
 
                         foundLines++;
-                    }
-                    else if ($(this).contents().length != 0) {
+                    } else if ($(this).contents().length != 0) {
                         calculateLines(false, $(this).contents());
                     }
 
