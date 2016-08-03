@@ -1,12 +1,13 @@
 (function ($) {
     $.fn.mtruncate = function (options) {
+        var self = this;
         var settings = $.extend({
             maxLines: 11,
             expandText: 'Expand',
             collapseText: 'Collapse',
             hideImageOnCollapse: true
         }, options);
-        var self = this;
+
 
         return this.each(function () {
             //Modify the container so that it supports collapsing
@@ -15,7 +16,7 @@
             var control = $('<div class="mTruncate-control">' + settings.expandText + '</div>').appendTo(wrapper);
 
             var floatStyle = truncateElement.css('float');
-            if(floatStyle == 'left' || floatStyle == 'right') {
+            if (floatStyle == 'left' || floatStyle == 'right') {
                 wrapper.css('float', floatStyle);
             }
 
@@ -29,19 +30,18 @@
                 }
 
                 //Iterate through every element in the container
-                element.each(function () {
-
+                element.each(function (key, value) {
                     //Type 8 is a comment node, this item is not displayed
-                    if (this.nodeType == 8) {
+                    if (value.nodeType == 8) {
                         return true;
                     }
 
-                    //All elements that are direct in the container?
-                    var tagName = $(this).prop('tagName');
-                    if (typeof tagName == 'undefined') {
+                    var tagName = value.tagName ? value.tagName.toLowerCase() : undefined;
 
+                    // Unwrapped elements inside the container must be text, calculate the height based on lineheight
+                    if (typeof tagName == 'undefined') {
                         //When the item has no height, stop calculating
-                        var text = this.textContent.trim();
+                        var text = value.textContent.trim();
                         if (text.length == 0) {
                             return true;
                         }
@@ -55,7 +55,7 @@
                         //Add size to ignore, we want to collapse with lines, not size
                         collapsedHeight += parseFloat(textParent.css('margin-top'));
 
-                        //When there are to much lines, determine how many can be shown
+                        //When there are too much lines, determine how many can be shown
                         var thisIsTheLastElementThatIsShown = foundLines + containerLinesThatHaveToBeVisible == settings.maxLines;
                         if ((foundLines + containerLinesThatHaveToBeVisible) >= settings.maxLines) {
                             containerLinesThatHaveToBeVisible = (settings.maxLines - foundLines);
@@ -71,33 +71,31 @@
                         }
 
                         return true;
-                    }
-
-                    //Include all header items, even when they have to be truncated, the the user will see that he is missing text
-                    if (tagName.indexOf('H') == 0 && tagName.length == 2 && !isNaN(tagName[1])) {
-                        collapsedHeight += $(this).height();
-                        collapsedHeight += parseFloat($(this).css('margin-top'));
-                        collapsedHeight += parseFloat($(this).css('margin-bottom'));
+                    } else if (tagName.length == 2 && tagName[0] == 'h' && isNaN(tagName[1]) == false) {
+                        //Include all header items, even when they have to be truncated, so the user will see that he is missing text
+                        collapsedHeight += $(value).height();
+                        collapsedHeight += parseFloat($(value).css('margin-top'));
+                        collapsedHeight += parseFloat($(value).css('margin-bottom'));
 
                         foundLines++;
-                    } else if (tagName.toLowerCase() == 'img') {
+                    } else if (tagName == 'img') {
                         //An image is not text, always show
                         if (settings.hideImageOnCollapse) {
-                            if ($(this).hasClass('mTruncate-hidden') == false) {
-                                $(this).addClass('mTruncate-hidden');
+                            if ($(value).hasClass('mTruncate-hidden') == false) {
+                                $(value).addClass('mTruncate-hidden');
                             }
 
                             return true;
                         }
 
-                        collapsedHeight += $(this).height();
-                        collapsedHeight += parseFloat($(this).css('margin-top'));
-                        collapsedHeight += parseFloat($(this).css('margin-bottom'));
+                        collapsedHeight += $(value).height();
+                        collapsedHeight += parseFloat($(value).css('margin-top'));
+                        collapsedHeight += parseFloat($(value).css('margin-bottom'));
 
                         foundLines++;
-                    } else if ($(this).contents().length != 0) {
-                        //Calculate for sub elements
-                        calculateLines(false, $(this).contents());
+                    } else if ($(value).contents().length > 0) {
+                        // Add height of children
+                        calculateLines(false, $(value).contents());
                     }
 
                     if (foundLines >= settings.maxLines) {
@@ -110,8 +108,8 @@
             $(window).resize(function () {
                 calculateLines(true, truncateElement.contents());
 
-                if(collapsedHeight == self.height()) {
-                    self.parent().find('.mTruncate-control').hide();
+                if (collapsedHeight == self.height() || foundLines < settings.maxLines) {
+                    control.hide();
                 }
 
                 if (wrapper.hasClass('mTruncate-collapsed')) {
